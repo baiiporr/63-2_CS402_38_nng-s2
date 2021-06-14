@@ -1,0 +1,138 @@
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="jquery.js"></script>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>เข้าสู่ระบบติดตามสถานะการกู้ยืมเงินกรอ. และ กยศ.มหาวิทยาลัยธรรมศาสตร์</title>
+    <!--Bootsrap 4 CDN-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <!--Fontawesome CDN-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+    <!-- api -->
+    <script>
+        $(document).ready(function() {
+            $("#txt_uname").keypress(function(event) {
+                if (event.which == 13) {
+                    $("#but_submit").click();
+                }
+            });
+
+            $("#txt_pwd").keypress(function(event) {
+                if (event.which == 13) {
+                    $("#but_submit").click();
+                }
+            });
+
+            $("#but_submit").click(function() {
+                var username = $("#txt_uname").val().trim();
+                var password = $("#txt_pwd").val().trim();
+                if (username == "" && password == "") {
+                    $("#message").html("กรุณากรอกเลขทะเบียน/เลขประจำตัว และ รหัส");
+                    $("#txt_uname").css('border-color', "red");
+                    $("#txt_pwd").css('border-color', "red");
+                } else if (username == "") {
+                    $("#message").html("กรุณากรอกเลขทะเบียน/เลขประจำตัว");
+                    $("#txt_uname").css('border-color', "red");
+                    $("#txt_pwd").css('border-color', "white");
+                } else if (password == "") {
+                    $("#message").html("กรุณากรอกรหัส");
+                    $("#txt_pwd").css('border-color', "red");
+                    $("#txt_uname").css('border-color', "white");
+                } else if (username != "" && password != "") {
+                    $("#txt_uname").css('border-color', "white");
+                    $("#txt_pwd").css('border-color', "white");
+                    $.ajax({
+                        url: 'api.php',
+                        type: 'post',
+                        data: {
+                            username: username,
+                            password: password
+                        },
+                        success: function(response) {
+                            var msg = "";
+                            if (response == 1) {
+                                window.location = "studentpage.php";
+                            } else if (response == 2) {
+                                window.location = "adminpage.php";
+                            } else {
+                                msg = response;
+                            }
+                            $("#message").html(msg);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+    <!--ตกแต่ง-->
+    <style>
+        body {
+            background: url('img/bg-login.jpg');
+            background-size: cover;
+        }
+        
+        .card {
+            color: white;
+            text-align: center;
+            height: 320px;
+            margin-top: auto;
+            margin-bottom: auto;
+            width: 400px;
+            background-color: #4d585e4f;
+        }
+        
+        .login_btn {
+            background-color: #34678ae8;
+            border: none;
+            color: rgb(248, 245, 245);
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 18px;
+            border: center;
+            cursor: pointer;
+            border-radius: 12px;
+        }
+    </style>
+
+    <body>
+        <div class="container">
+            <div class="d-flex justify-content-center h-100">
+                <div class="card">
+                    <div class="card-header">
+                        <h4> เข้าสู่ระบบ (นักศึกษา/บุคลากร)</h4>
+                    </div>
+                    <div id="message"></div>
+                    <div class="card-body">
+                        <div class="input-group form-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            </div>
+                            <input type="text" id="txt_uname" name="txt_uname" class="form-control" placeholder="เลขทะเบียนนักศึกษา/เลขประจำตัวบุคลากร" />
+                        </div>
+                        <div class="input-group form-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                            </div>
+                            <input type="password" id="txt_pwd" name="txt_pwd" class="form-control" placeholder="รหัสผ่าน" />
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" id="but_submit" name="but_submit" value="เข้าสู่ระบบ" class="btn login_btn">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</head>
+
+</html>

@@ -1,0 +1,88 @@
+<?php
+include_once 'data.php';
+/** PHPExcel */
+require_once 'Classes/PHPExcel.php';
+/** PHPExcel_IOFactory - Reader */
+include 'Classes/PHPExcel/IOFactory.php';
+
+if (isset($_POST['submitaddfilebank'])) {
+
+    $file =  $_FILES['fileToUploadarraybank']['name'];
+    $file_loc = $_FILES['fileToUploadarraybank']['tmp_name'];
+    $file_size = $_FILES['fileToUploadarraybank']['size'];
+    $file_type = $_FILES['fileToUploadarraybank']['type'];
+    $folder = "uplodefilebank/";
+
+    /* new file size in KB */
+    $new_size = $file_size / 1024;
+    /* new file size in KB */
+
+    /* make file name in lower case */
+    $new_file_name = strtolower($file);
+    /* make file name in lower case */
+
+    $final_file = str_replace(' ', '-', $new_file_name);
+
+    if (move_uploaded_file($file_loc, $folder . $final_file)) {
+        $sql = "INSERT INTO file_report_bank(file_name,type,size) VALUES('$final_file','$file_type','$new_size')";
+        mysqli_query($conn, $sql);
+        //echo "ไฟล์ ". htmlspecialchars( basename( $_FILES["fileToUploadline"]["name"])). " ได้รับการอัปโหลด" ;
+        echo "<script type='text/javascript'>";
+        echo "alert('ไฟล์ไฟล์รายงานการกู้ยืมจากธนาคารได้รับการอัปโหลด');";
+        //echo "window.location = 'reports-of-loan.php'; ";
+        echo "</script>";
+    } else {
+
+        echo "<script type='text/javascript'>";
+        echo "alert('ขออภัยเกิดข้อผิดพลาดในการอัปโหลดไฟล์ของคุณ');";
+        // echo "window.location = 'reports-of-loan.php'; ";
+        echo "</script>";
+    }
+
+    $query = "SELECT * FROM file_report_bank" or die("Error:");
+    //3.เก็บข้อมูลที่ query ออกมาไว้ในตัวแปร result . 
+    $result = mysqli_query($conn, $query);
+    //4 . แสดงข้อมูลที่ query ออกมา โดยใช้ตารางในการจัดข้อมูล: 
+    echo "<table border='1' align='center' width='100'>";
+    while ($row = mysqli_fetch_array($result)) {
+        $excelfilebank = $row['file_name'];
+
+        // echo "<tr>";
+        //echo "<td>" . "<img src='uplodefilebank/" . $row["file_name"] . "' width='500'>" . "</td>";
+
+
+        // $inputFileName ="uplodefilebank/$pdffile"; 
+        $inputFileName = "uplodefilebank/$excelfilebank";
+        $inputFileType = PHPExcel_IOFactory::identify($inputFileName);
+        $objReader = PHPExcel_IOFactory::createReader($inputFileType);
+        $objReader->setReadDataOnly(true);
+        $objPHPExcel = $objReader->load($inputFileName);
+
+        $objWorksheet = $objPHPExcel->setActiveSheetIndex(0);
+        $highestRow = $objWorksheet->getHighestRow();
+        $highestColumn = $objWorksheet->getHighestColumn();
+
+        $headingsArray = $objWorksheet->rangeToArray('A1:' . $highestColumn . '1', null, true, true, true);
+        $headingsArray = $headingsArray[1];
+        //$final_file = str_replace(' ', '-', $new_file_name);
+
+
+        $r = -1;
+        $namedDataArray = array();
+        for ($row = 2; $row <= $highestRow; ++$row) {
+            $dataRow = $objWorksheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, null, true, true, true);
+            if ((isset($dataRow[$row]['A'])) && ($dataRow[$row]['A'] > '')) {
+                ++$r;
+                foreach ($headingsArray as $columnKey => $columnHeading) {
+                    $namedDataArray[$r][$columnHeading] = $dataRow[$row][$columnKey];
+                }
+            }
+        }
+
+        echo '<pre>';
+        var_dump($namedDataArray);
+
+        echo '</pre><hr />';
+    }
+    mysqli_close($conn);
+}
